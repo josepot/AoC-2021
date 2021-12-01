@@ -1,0 +1,49 @@
+{
+  "name": "AoC-2021",
+  "version": "1.0.0",
+  "description": "Advent of Code 2021",
+  "main": "index.js",
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "repository": "https://github.com/josepot/AoC-2021",
+  "author": "Josep M Sobrepere",
+  "license": "MIT",
+  "dependencies": {
+    "id-permutations": "^1.0.6",
+    "md5": "^2.2.1",
+    "priorityqueuejs": "^2.0.0",
+    "rxjs": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/priorityqueuejs": "^1.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "babel-eslint": "^10.0.3",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.3.0",
+    "eslint-config-ts-node": "^0.1.1",
+    "eslint-plugin-import": "^2.25.3",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.1.2",
+    "prettier": "^2.5.0",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.12.0",
+    "typescript": "^4.5.2"
+  },
+  "prettier": {
+    "semi": false,
+    "trailingComma": "all"
+  },
+  "scripts": {
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "ts-solution": "ts-node -r tsconfig-paths/register ./src/index.js",
+    "js-solution": "node ./src/index.js",
+    "ts-test": "ts-node -r tsconfig-paths/register ./src/tests.js",
+    "download": "node ./src/downloadInput.js",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,scss,md}": "prettier --write"
+  }
+}
