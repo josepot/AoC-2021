@@ -15,6 +15,7 @@ const askQuestion = (x) => new Promise((res) => rl.question(x, res))
 
 const relPath = path.resolve(__dirname)
 const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
 
 const [cmdName, , day_, idx] = process.argv
 const day = day_ || new Date().getDate()
@@ -32,6 +33,18 @@ const fn =
     : Array.isArray(fns)
     ? fns.filter(Boolean).slice(-1)[0]
     : fns
+
+const updateOutputs = async (idx, answer) => {
+  const filePath = `${dayPath}/outputs`
+  const currentOutput = await readFile(filePath, "utf-8")
+  const currentParts = currentOutput.split("\n")
+  const output = Array(2)
+    .fill(null)
+    .map((_, index) => (index === idx ? answer : currentParts[index]))
+    .filter((x) => x !== undefined)
+    .join("\n")
+  return writeFile(filePath, output)
+}
 
 const submitSolution = async (solution, level, session, year) => {
   console.log(
@@ -75,7 +88,8 @@ const submitSolution = async (solution, level, session, year) => {
   const [, main] = result.match(/<main>((.|\n)*)<\/main>/)
 
   if (main.includes("That's the right answer!")) {
-    return console.log("\x1b[32m", "That's right!")
+    console.log("\x1b[32m", "That's right!")
+    return updateOutputs(level - 1, solution)
   }
 
   const wrongMatch = main.match(
