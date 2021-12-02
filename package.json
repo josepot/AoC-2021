@@ -37,9 +37,8 @@
   },
   "scripts": {
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "ts-solution": "ts-node -r tsconfig-paths/register ./src/index.js",
-    "js-solution": "node ./src/index.js",
-    "ts-test": "ts-node -r tsconfig-paths/register ./src/tests.js",
+    "solution": "ts-node -r tsconfig-paths/register ./src/index.js",
+    "test": "ts-node -r tsconfig-paths/register ./src/tests.js",
     "download": "node ./src/downloadInput.js",
     "prepare": "husky install"
   },
