@@ -70,6 +70,37 @@ const solution1 = (lines: string[]) => {
   }
 }
 
-const solution2 = (lines: string[]) => {}
+const solution2 = (lines: string[]) => {
+  const lottery = lines.splice(0, 1)[0].split(",").map(Number)
 
-export default [solution1]
+  let boards: Board[] = []
+
+  while (lines.length > 0) {
+    boards.push(
+      getBoard(
+        lines
+          .splice(0, 6)
+          .slice(1)
+          .map((line) =>
+            line
+              .split(" ")
+              .map((x) => parseInt(x))
+              .filter((x) => !Number.isNaN(x)),
+          ),
+      ),
+    )
+  }
+
+  let i = 0
+  for (; boards.length > 1; i++) {
+    const current = lottery[i]
+    boards = boards.filter((board) => !board.callNumber(current))
+  }
+
+  for (; true; i++) {
+    const current = lottery[i]
+    if (boards[0].callNumber(current)) return boards[0].getScore(current)
+  }
+}
+
+export default [solution1, solution2]
