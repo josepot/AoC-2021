@@ -36,7 +36,7 @@ export default function printPositionsMap<T extends string | number | symbol>(
       Array(width)
         .fill(null)
         .map((_, xDelta) => xDelta + limits.left)
-        .map((x, xx) => mapper(map.get([x, y].join(","))!, xx, yy, x, y) ?? "?")
+        .map((x, xx) => mapper(map.get([x, y].join(","))!, xx, yy, x, y) ?? ".")
         .join(""),
     )
   return result.join("\n")
