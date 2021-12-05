@@ -47,7 +47,7 @@ Promise.all(
         const fns = mod.default || mod
         return Promise.all(
           fns
-            .map((fn) => fn(lines))
+            .map((fn) => fn(lines.slice(0)))
             .map((x) => (x instanceof Promise ? x : Promise.resolve(x)))
             .map(async (p, idx) => {
               const received = await p.then((x) => x.toString())
