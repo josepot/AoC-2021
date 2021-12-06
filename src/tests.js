@@ -15,7 +15,7 @@ const relPath = path.resolve(__dirname)
 const getInput = (text) => {
   const lines = text.split("\n")
   let input
-  if (lines.length > 1) {
+  if (lines.length > 2) {
     lines.splice(-1, 1)
     input = lines
   } else {
