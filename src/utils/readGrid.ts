@@ -7,7 +7,7 @@ export function getGrid<T>(data: T[][]) {
   const N_COLS = data[0].length
 
   const getCell = (x: number, y: number) => data[y]?.[x]
-  const getCrossNeighbours = (x: number, y: number) =>
+  const getCrossNeighboursPos = (x: number, y: number) =>
     [
       [-1, 0],
       [1, 0],
@@ -16,7 +16,9 @@ export function getGrid<T>(data: T[][]) {
     ]
       .map(([diffX, diffY]) => [x + diffX, y + diffY] as const)
       .filter(([xx, yy]) => xx > -1 && xx < N_COLS && yy > -1 && yy < N_ROWS)
-      .map(([xx, yy]) => getCell(xx, yy))
+
+  const getCrossNeighbours = (x: number, y: number) =>
+    getCrossNeighboursPos(x, y).map(([xx, yy]) => getCell(xx, yy))
   const getDiagonalNeighbours = (x: number, y: number) =>
     [
       [-1, -1],
@@ -40,6 +42,7 @@ export function getGrid<T>(data: T[][]) {
     getCell,
     getAllNeighbours,
     getCrossNeighbours,
+    getCrossNeighboursPos,
     getDiagonalNeighbours,
     map,
     N_ROWS,
