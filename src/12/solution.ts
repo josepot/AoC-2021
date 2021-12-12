@@ -8,7 +8,7 @@ interface Path {
   prev: Path | null
   current: Cave
   smallCaves: Set<Cave>
-  wildCard: boolean
+  wildCard?: boolean
 }
 
 const solution1 = (lines: string[]) => {
@@ -35,7 +35,6 @@ const solution1 = (lines: string[]) => {
     prev: null,
     current: caves.get("start")!,
     smallCaves: new Set(),
-    wildCard: false,
   }
   startingPath.smallCaves.add(startingPath.current)
 
@@ -43,15 +42,12 @@ const solution1 = (lines: string[]) => {
     if (from.current.id === "end") return [from]
 
     return [...from.current.edges]
-      .filter((edge) => {
-        return !from.smallCaves.has(edge)
-      })
+      .filter((edge) => !from.smallCaves.has(edge))
       .map((edge) => {
         const newFrom: Path = {
           prev: from,
           current: edge,
           smallCaves: new Set(from.smallCaves),
-          wildCard: false,
         }
 
         if (!edge.isBig) newFrom.smallCaves.add(edge)
@@ -88,7 +84,6 @@ const solution2 = (lines: string[]) => {
     prev: null,
     current: caves.get("start")!,
     smallCaves: new Set(),
-    wildCard: false,
   }
   startingPath.smallCaves.add(startingPath.current)
 
@@ -96,11 +91,10 @@ const solution2 = (lines: string[]) => {
     if (from.current.id === "end") return [from]
 
     return [...from.current.edges]
-      .filter((edge) => {
-        return (
-          !from.smallCaves.has(edge) || (!from.wildCard && edge.id !== "start")
-        )
-      })
+      .filter(
+        (edge) =>
+          !from.smallCaves.has(edge) || (!from.wildCard && edge.id !== "start"),
+      )
       .map((edge) => {
         const newFrom: Path = {
           prev: from,
