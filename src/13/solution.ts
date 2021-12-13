@@ -8,7 +8,7 @@ interface Fold {
   value: number
 }
 
-const solution1 = (lines: string[]) => {
+const parseInput = (lines: string[]): { dots: Set<string>; folds: Fold[] } => {
   const dots = new Set<string>()
   let foundFold = false
   const folds: Fold[] = []
@@ -26,6 +26,10 @@ const solution1 = (lines: string[]) => {
     }
   })
 
+  return { dots, folds }
+}
+
+const fold = (fold: Fold, dots: Set<string>) => {
   const foldX = (xLine: number) => {
     ;[...dots].forEach((rawDot) => {
       const [x, y] = rawDot.split(",").map(Number)
@@ -48,20 +52,27 @@ const solution1 = (lines: string[]) => {
     })
   }
 
-  folds.forEach((fold) => {
-    const firstFold = fold
-    const foldFn = firstFold.type === FoldType.x ? foldX : foldY
-    foldFn(firstFold.value)
-  })
-
-  const positionsMap = new Map<string, string>()
-  dots.forEach((dot) => {
-    positionsMap.set(dot, dot)
-  })
-
-  return printPositionsMap(positionsMap, (x) => (dots.has(x) ? "#" : "."))
+  const foldFn = fold.type === FoldType.x ? foldX : foldY
+  foldFn(fold.value)
 }
 
-const solution2 = (lines: string[]) => {}
+const solution1 = (lines: string[]) => {
+  const { dots, folds } = parseInput(lines)
+  fold(folds[0], dots)
 
-export default [solution1]
+  return dots.size
+}
+
+const solution2 = (lines: string[]) => {
+  const { dots, folds } = parseInput(lines)
+
+  folds.forEach((f) => {
+    fold(f, dots)
+  })
+
+  return printPositionsMap(new Map([...dots].map((dot) => [dot, dot])), (dot) =>
+    dots.has(dot) ? "#" : ".",
+  )
+}
+
+export default [solution1, solution2]
