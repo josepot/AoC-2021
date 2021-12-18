@@ -118,6 +118,16 @@ const magnitude = (input: Pair | number): number => {
 const solution1 = (lines: string[]) =>
   magnitude(lines.map(parseLine).reduce((a, b) => reduced(addPair(a, b))))
 
-const solution2 = (lines: string[]) => {}
+const solution2 = (lines: string[]) => {
+  const parsed = lines.map(parseLine)
+  let result = -Infinity
+  for (let i = 0; i < lines.length - 1; i++) {
+    for (let z = i + 1; z < lines.length; z++) {
+      const t = magnitude(reduced(addPair(parsed[i], parsed[z])))
+      result = Math.max(t, result)
+    }
+  }
+  return result
+}
 
-export default [solution1]
+export default [solution1, solution2]
