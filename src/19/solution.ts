@@ -1,9 +1,14 @@
 import add from "utils/add"
 
 type Position = [number, number, number]
+interface PositionWithScanner {
+  position: Position
+  isScanner: boolean
+}
 
 interface Beacon {
   idx: number
+  isScanner: boolean
   positionInScanner: Position
   distances: Map<number, number>
 }
@@ -13,7 +18,10 @@ interface Scanner {
   beacons: Array<Beacon>
 }
 
-const mergeScanners = (a: Scanner, b: Scanner): Position[] | null => {
+const mergeScanners = (
+  a: Scanner,
+  b: Scanner,
+): PositionWithScanner[] | null => {
   const overlaps: { aIdx: number; bIdx: number; nOverlaps: number }[] = []
 
   for (let aIdx = 0; aIdx < a.beacons.length; aIdx++) {
@@ -70,14 +78,19 @@ const mergeScanners = (a: Scanner, b: Scanner): Position[] | null => {
   const aIdxs = aSortedDeltas.map((x) => x[0])
   const bIdxs = bSortedDeltas.map((x) => x[0])
 
-  const aPositions = a.beacons.map(({ positionInScanner }) => {
+  const scanners = new Set<string>()
+
+  const aPositions = a.beacons.map(({ positionInScanner, isScanner }) => {
     const x = positionInScanner[aIdxs[0]] - fromA.positionInScanner[aIdxs[0]]
     const y = positionInScanner[aIdxs[1]] - fromA.positionInScanner[aIdxs[1]]
     const z = positionInScanner[aIdxs[2]] - fromA.positionInScanner[aIdxs[2]]
-    return [x, y, z] as Position
+
+    const result = [x, y, z].join(",")
+    if (isScanner) scanners.add(result)
+    return result
   })
 
-  const bPositions = b.beacons.map(({ positionInScanner }) => {
+  const bPositions = b.beacons.map(({ positionInScanner, isScanner }) => {
     const x =
       (positionInScanner[bIdxs[0]] - fromB.positionInScanner[bIdxs[0]]) *
       bMultipliers[0]
@@ -87,24 +100,29 @@ const mergeScanners = (a: Scanner, b: Scanner): Position[] | null => {
     const z =
       (positionInScanner[bIdxs[2]] - fromB.positionInScanner[bIdxs[2]]) *
       bMultipliers[2]
-    return [x, y, z] as Position
+
+    const result = [x, y, z].join(",")
+    if (isScanner) scanners.add(result)
+    return result
   })
 
-  const result = new Set<string>(
-    aPositions
-      .map((x) => x.join(","))
-      .concat(bPositions.map((x) => x.join(","))),
-  )
+  const result = new Set<string>(aPositions.concat(bPositions))
 
   if (aPositions.length + bPositions.length - result.size < 12) return null
 
-  return [...result].map((r) => r.split(",").map(Number) as Position)
+  return [...result].map((r) => ({
+    position: r.split(",").map(Number) as Position,
+    isScanner: scanners.has(r),
+  }))
 }
 
 const getDistance = (a: Position, b: Position): number =>
   Math.sqrt(a.map((x, idx) => Math.pow(x - b[idx], 2)).reduce(add))
 
-const getScanner = (positions: Position[], scannerIdx: number): Scanner => {
+const getScanner = (
+  positions: PositionWithScanner[],
+  scannerIdx: number,
+): Scanner => {
   const beacons = new Array<Beacon>(positions.length)
   const result: Scanner = { idx: scannerIdx, beacons }
 
@@ -112,14 +130,16 @@ const getScanner = (positions: Position[], scannerIdx: number): Scanner => {
     for (let bIdx = aIdx + 1; bIdx < positions.length; bIdx++) {
       const beaconA: Beacon = beacons[aIdx] || {
         idx: aIdx,
-        positionInScanner: positions[aIdx],
+        isScanner: positions[aIdx].isScanner,
+        positionInScanner: positions[aIdx].position,
         distances: new Map<number, number>(),
       }
       beacons[aIdx] = beaconA
 
       const beaconB = beacons[bIdx] || {
         idx: bIdx,
-        positionInScanner: positions[bIdx],
+        isScanner: positions[bIdx].isScanner,
+        positionInScanner: positions[bIdx].position,
         distances: new Map<number, number>(),
       }
       beacons[bIdx] = beaconB
@@ -166,8 +186,8 @@ const getMatchingPriorities = (input: Scanner[]) => {
 }
 
 const mergeManyScanners = (
-  input: Array<Array<Position>>,
-): Array<Array<Position>> => {
+  input: Array<Array<PositionWithScanner>>,
+): Array<Array<PositionWithScanner>> => {
   const scanners = input.map(getScanner)
   const priorities = getMatchingPriorities(scanners)
   const toMerge = new Set(
@@ -176,7 +196,7 @@ const mergeManyScanners = (
       .map((_, idx) => idx),
   )
 
-  const result: Array<Array<Position>> = []
+  const result: Array<Array<PositionWithScanner>> = []
 
   for (let i = 0; i < priorities.length; i++) {
     const current = priorities[i]
@@ -194,7 +214,7 @@ const mergeManyScanners = (
 }
 
 const solution1 = (lines: string[]) => {
-  let scannersRaw: Array<Array<Position>> = []
+  const scannersRaw: Array<Array<Position>> = []
 
   let current: Array<Position> = []
   lines.forEach((line) => {
@@ -206,16 +226,68 @@ const solution1 = (lines: string[]) => {
     current.push(line.split(",").map(Number) as Position)
   })
 
-  let next = scannersRaw
+  let scanners: Array<Array<PositionWithScanner>> = scannersRaw.map(
+    (positions) =>
+      positions
+        .map((position) => ({ position, isScanner: false }))
+        .concat({ position: [0, 0, 0], isScanner: true }),
+  )
+
+  let next = scanners
 
   do {
-    scannersRaw = next
-    next = mergeManyScanners(scannersRaw)
-  } while (scannersRaw.length !== next.length)
+    scanners = next
+    next = mergeManyScanners(scanners)
+  } while (next.length > 1)
 
-  return scannersRaw.reduce((a, b) => a + b.length, 0)
+  return next[0].filter((x) => !x.isScanner).length
 }
 
-const solution2 = (lines: string[]) => {}
+const solution2 = (lines: string[]) => {
+  const scannersRaw: Array<Array<Position>> = []
 
-export default [solution1]
+  let current: Array<Position> = []
+  lines.forEach((line) => {
+    if (line.startsWith("---")) {
+      current = []
+      return scannersRaw.push(current)
+    }
+    if (line === "") return
+    current.push(line.split(",").map(Number) as Position)
+  })
+
+  let scanners: Array<Array<PositionWithScanner>> = scannersRaw.map(
+    (positions) =>
+      positions
+        .map((position) => ({ position, isScanner: false }))
+        .concat({ position: [0, 0, 0], isScanner: true }),
+  )
+
+  let next = scanners
+
+  do {
+    scanners = next
+    next = mergeManyScanners(scanners)
+  } while (next.length > 1)
+
+  const finalScanners = next[0]
+    .filter((x) => x.isScanner)
+    .map((x) => x.position)
+
+  let maxDistance = 0
+  const getManDistance = (a: Position, b: Position): number =>
+    a.map((value, idx) => Math.abs(b[idx] - value)).reduce(add)
+
+  for (let aIdx = 0; aIdx < finalScanners.length - 1; aIdx++) {
+    for (let bIdx = aIdx + 1; bIdx < finalScanners.length; bIdx++) {
+      maxDistance = Math.max(
+        maxDistance,
+        getManDistance(finalScanners[aIdx], finalScanners[bIdx]),
+      )
+    }
+  }
+
+  return maxDistance
+}
+
+export default [solution1, solution2]
