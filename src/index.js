@@ -36,13 +36,16 @@ const fn =
 
 const updateOutputs = async (idx, answer) => {
   const filePath = `${dayPath}/outputs`
-  const currentOutput = await readFile(filePath, "utf-8")
+  let currentOutput = ""
+  try {
+    currentOutput = await readFile(filePath, "utf-8")
+  } catch (e) {}
   const currentParts = currentOutput.split("\n")
-  const output = Array(2)
-    .fill(null)
-    .map((_, index) => (index === idx ? answer : currentParts[index]))
-    .filter((x) => x !== undefined)
-    .join("\n")
+  const output =
+    Array(2)
+      .fill(null)
+      .map((_, index) => (index === idx ? answer : currentParts[index] ?? ""))
+      .join("\n") + "\n"
   return writeFile(filePath, output)
 }
 
