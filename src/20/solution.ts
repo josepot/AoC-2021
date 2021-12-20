@@ -1,39 +1,30 @@
+const range = (from: number, to: number) => {
+  const result = new Array<number>(to - from)
+  for (let i = from; i <= to; i++) result[i - from] = i
+  return result
+}
+
 const solution1 = (lines: string[], nTimes = 2) => {
   const base = lines[0]
   let baseImage = lines.slice(2)
 
-  const getPixelAtPos = (x: number, y: number, idx: number) => {
-    const defaultC = idx % 2 === 0 ? "." : "#"
+  const getPixelAtPos = (x: number, y: number, defaultC: string) => {
     let binaryStr = ""
 
-    binaryStr += (baseImage[y - 1]?.[x - 1] ?? defaultC) === "." ? "0" : "1"
-    binaryStr += (baseImage[y - 1]?.[x] ?? defaultC) === "." ? "0" : "1"
-    binaryStr += (baseImage[y - 1]?.[x + 1] ?? defaultC) === "." ? "0" : "1"
-
-    binaryStr += (baseImage[y]?.[x - 1] ?? defaultC) === "." ? "0" : "1"
-    binaryStr += (baseImage[y]?.[x] ?? defaultC) === "." ? "0" : "1"
-    binaryStr += (baseImage[y]?.[x + 1] ?? defaultC) === "." ? "0" : "1"
-
-    binaryStr += (baseImage[y + 1]?.[x - 1] ?? defaultC) === "." ? "0" : "1"
-    binaryStr += (baseImage[y + 1]?.[x] ?? defaultC) === "." ? "0" : "1"
-    binaryStr += (baseImage[y + 1]?.[x + 1] ?? defaultC) === "." ? "0" : "1"
+    for (let yy = y - 1; yy <= y + 1; yy++)
+      for (let xx = x - 1; xx <= x + 1; xx++)
+        binaryStr += (baseImage[yy]?.[xx] ?? defaultC) === "." ? "0" : "1"
 
     return base[parseInt(binaryStr, 2)]
   }
 
-  const margin = 1
-
   for (let i = 0; i < nTimes; i++) {
-    baseImage = Array(baseImage.length + margin + margin)
-      .fill(null)
-      .map((_, idx) => idx - margin)
-      .map((y) =>
-        Array(baseImage[0].length + margin + margin)
-          .fill(null)
-          .map((_, idx) => idx - margin)
-          .map((x) => getPixelAtPos(x, y, i))
-          .join(""),
-      )
+    const defaultC = i % 2 === 0 ? "." : "#"
+    baseImage = range(-1, baseImage.length + 1).map((y) =>
+      range(-1, baseImage[0].length + 1)
+        .map((x) => getPixelAtPos(x, y, defaultC))
+        .join(""),
+    )
   }
 
   return baseImage
