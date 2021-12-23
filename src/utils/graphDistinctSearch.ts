@@ -4,7 +4,7 @@ const graphDistinctSearch = <T extends { id: string }>(
   initialNode: T,
   analizeNode: (node: T) => T[] | true,
   comparator: (a: T, b: T) => number,
-  comparatorReplace: (prev: T, current: T) => boolean = () => true,
+  comparatorReplace: (prev: T, current: T) => boolean = () => false,
 ): T => {
   const analized = new Map<string, T>([[initialNode.id, initialNode]])
   return graphSearch(
