@@ -4,15 +4,18 @@ const graphDistinctSearch = <T extends { id: string }>(
   initialNode: T,
   analizeNode: (node: T) => T[] | true,
   comparator: (a: T, b: T) => number,
+  comparatorReplace: (prev: T, current: T) => boolean = () => true,
 ): T => {
-  const analized = new Set<string>([initialNode.id])
+  const analized = new Map<string, T>([[initialNode.id, initialNode]])
   return graphSearch(
     initialNode,
     (node: T) => {
       const nodes = analizeNode(node)
       if (nodes === true) return nodes
-      const result = nodes.filter((x) => !analized.has(x.id))
-      result.forEach((x) => analized.add(x.id))
+      const result = nodes.filter(
+        (x) => !analized.has(x.id) || comparatorReplace(analized.get(x.id)!, x),
+      )
+      result.forEach((x) => analized.set(x.id, x))
       return result
     },
     comparator,

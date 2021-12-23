@@ -67,11 +67,11 @@ interface GamePosition {
   map: Record<string, null | AmphipodType>
 }
 
-const getGamePositionId = (amphipods: Amphipod[], points: number) =>
-  amphipods.map((a) => a.location).join(",") + ":" + points
+const getGamePositionId = (amphipods: Amphipod[]) =>
+  amphipods.map((a) => a.location).join(",")
 
 const initialGamePosition: GamePosition = {
-  id: getGamePositionId(initialAmphipods, 0),
+  id: getGamePositionId(initialAmphipods),
   prev: null,
   points: 0,
   map: initialmap,
@@ -118,7 +118,7 @@ const generateMoves = (currentGame: GamePosition): GamePosition[] | true => {
         }
 
         result.push({
-          id: getGamePositionId(nextAmphipods, nextPoints),
+          id: getGamePositionId(nextAmphipods),
           prev: currentGame,
           points: nextPoints,
           amphipods: nextAmphipods,
@@ -148,7 +148,7 @@ const generateMoves = (currentGame: GamePosition): GamePosition[] | true => {
         }
 
         result.push({
-          id: getGamePositionId(nextAmphipods, nextPoints),
+          id: getGamePositionId(nextAmphipods),
           prev: currentGame,
           points: nextPoints,
           amphipods: nextAmphipods,
@@ -195,7 +195,7 @@ const generateMoves = (currentGame: GamePosition): GamePosition[] | true => {
       }
 
       result.push({
-        id: getGamePositionId(nextAmphipods, nextPoints),
+        id: getGamePositionId(nextAmphipods),
         prev: currentGame,
         points: nextPoints,
         amphipods: nextAmphipods,
@@ -240,6 +240,7 @@ const solution1 = () =>
     initialGamePosition,
     generateMoves,
     (a, b) => b.points - a.points,
+    (prev, current) => current.points < prev.points,
   ).points
 
 const solution2 = (lines: string[]) => {}
